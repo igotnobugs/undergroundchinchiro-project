@@ -1,0 +1,3 @@
+﻿  Source.cpp
+c:\users\11400314\documents\github\undergroundchinchiro-project\undergroundchinchiro-project\source.cpp(88): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  undergroundchinchiro-project.vcxproj -> C:\Users\11400314\Documents\GitHub\undergroundchinchiro-project\Debug\undergroundchinchiro-project.exe
