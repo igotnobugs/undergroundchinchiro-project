@@ -3,14 +3,31 @@
 #include "printInfoText.h"
 using namespace std;
 
-void printInfoText(int curRound, int curMoney, int wager) {
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
-	cout << "Round: " << curRound << " / 10" <<endl;
+void PrintInfoText(int curRound, int curMoney, int wager, bool clearScreen) {
+	if (clearScreen) {
+		system("cls");
+	}
+
+	cout << "Round: " << curRound << " / 10" << endl;
 	cout << "You have: ";
 
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 13);
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO csbInfo; 
+	GetConsoleScreenBufferInfo(hConsole, &csbInfo);
+	int lastColor = csbInfo.wAttributes;
+	int color;
+	if (curMoney < 60000) {
+		color = 14; //Yellow
+	}
+	else if (curMoney < 30000) {
+		color = 12; //Red
+	}
+	else {
+		color = 11; //Light-Blue
+	}
+	SetConsoleTextAttribute(hConsole, color);
 	cout << curMoney << " Perica" << endl;
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+	SetConsoleTextAttribute(hConsole, lastColor);
 
 	if (wager != 0) {
 		cout << "Your wager is: " << wager << " Perica" << endl;

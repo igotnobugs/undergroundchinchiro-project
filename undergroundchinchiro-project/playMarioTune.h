@@ -1,4 +1,5 @@
 #pragma once
 
-//Play Mario music, credits to Guest_ub3rphr34k_* in rohitab.com
-void playMario();
+//Play Mario music
+//0 - Game Over, 1 - Main Theme
+void PlayTuneMario(int type);
