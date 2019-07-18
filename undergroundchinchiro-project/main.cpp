@@ -106,6 +106,7 @@ Roll dealerRoll;
 Roll playerRoll;
 int main() {
 	srand(time(NULL)); //Randomize Seed
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15); //Set default color of text
 
 	//Initialization
 	dealerUser.name = "OTSUKI";
