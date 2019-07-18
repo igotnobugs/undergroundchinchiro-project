@@ -4,7 +4,7 @@ BASPROG1 FINAL PROJECT
 Text-based  
 
 ### Tips:  
-**Bet 1** - Bet Minimum
+**Bet 1** - Bet Minimum  
 **Bet 2** - Bet again with the same amount  
 **Bet 3** - Bet everything  
 **Bet 4** - Bet 20000  
