@@ -46,8 +46,8 @@ void PlayNote(char note, int octave, DWORD duration, bool isSharp = false, int r
 		Beep(100, 500);
 		Beep(100, 500);
 	}
-	float pos = tone + (12 * (octave - 1));
-	DWORD freq = pow(2, (pos - 49) / 12) * 440;
+	float pos = tone + (12 * ((float)octave - 1));
+	DWORD freq = (DWORD)(pow(2, (pos - 49) / 12) * 440);
 	for (int i = 0; i < reps; i++) {
 		Beep(freq, duration);
 	}
