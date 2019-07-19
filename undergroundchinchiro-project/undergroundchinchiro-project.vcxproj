@@ -130,6 +130,7 @@
     <ClInclude Include="playTuneLaSalle.h" />
     <ClInclude Include="playTuneMario.h" />
     <ClInclude Include="playNote.h" />
+    <ClInclude Include="playTuneMegalovania.h" />
     <ClInclude Include="printInfoText.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

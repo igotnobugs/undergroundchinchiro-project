@@ -1,11 +1,13 @@
 #include <windows.h>
 #include <iostream>
 #include <math.h>
-
 using namespace std;
+
+enum tone { C, Cs, D, Ds, E, F, Fs, G, Gs, A, As, B };
 
 void PlayNote(char note, int octave, DWORD duration, bool isSharp = false, int reps = 1) {
 	int tone = 0;
+
 	if (isSharp) {
 		if (note == 'C') {
 			tone = 5;
@@ -18,6 +20,9 @@ void PlayNote(char note, int octave, DWORD duration, bool isSharp = false, int r
 		}
 		else if (note == 'G') {
 			tone = 12;
+		}
+		else { // A
+			tone = 14;
 		}
 	}
 	if (note == 'C') {

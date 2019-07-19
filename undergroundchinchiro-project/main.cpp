@@ -8,6 +8,7 @@
 #include "playTuneMario.h"
 #include "playNote.h"
 #include "playTuneLaSalle.h"
+#include "playTuneMegalovania.h"
 
 using namespace std;
 
@@ -663,6 +664,8 @@ int main() {
 	//Initialization
 	User dealerUser = {"OTSUKI"};
 	User playerUser = { "KAIJI" , STARTING_MONEY };
+
+	PlayTuneMegalovania();
 
 	//WINDOWS XP START UP Sound OPENING if true
 	StartUpSequence(includeStartUp);

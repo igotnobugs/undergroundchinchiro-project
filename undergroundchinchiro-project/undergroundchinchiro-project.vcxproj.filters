@@ -50,5 +50,8 @@
     <ClInclude Include="playTuneLaSalle.h">
       <Filter>Resource Files\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="playTuneMegalovania.h">
+      <Filter>Resource Files\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
