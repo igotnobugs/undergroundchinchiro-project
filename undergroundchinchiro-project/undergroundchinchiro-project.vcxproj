@@ -115,9 +115,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="playLaSalle.cpp" />
+    <ClCompile Include="playTuneLaSalle.cpp" />
+    <ClCompile Include="playTuneMegalovania.cpp" />
     <ClCompile Include="playNote.cpp" />
-    <ClCompile Include="playMarioTune.cpp" />
+    <ClCompile Include="playTuneMario.cpp" />
     <ClCompile Include="printInfoText.cpp">
       <FileType>CppCode</FileType>
     </ClCompile>
@@ -126,8 +127,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="playLaSalle.h" />
-    <ClInclude Include="playMarioTune.h" />
+    <ClInclude Include="playTuneLaSalle.h" />
+    <ClInclude Include="playTuneMario.h" />
     <ClInclude Include="playNote.h" />
     <ClInclude Include="printInfoText.h" />
   </ItemGroup>

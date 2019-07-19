@@ -24,27 +24,30 @@
     <ClCompile Include="playNote.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="playLaSalle.cpp">
-      <Filter>Source Files\tunes</Filter>
-    </ClCompile>
-    <ClCompile Include="playMarioTune.cpp">
-      <Filter>Source Files\tunes</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="playTuneMario.cpp">
+      <Filter>Source Files\tunes</Filter>
+    </ClCompile>
+    <ClCompile Include="playTuneMegalovania.cpp">
+      <Filter>Source Files\tunes</Filter>
+    </ClCompile>
+    <ClCompile Include="playTuneLaSalle.cpp">
+      <Filter>Source Files\tunes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="printInfoText.h">
       <Filter>Resource Files\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="playMarioTune.h">
-      <Filter>Resource Files\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="playNote.h">
       <Filter>Resource Files\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="playLaSalle.h">
+    <ClInclude Include="playTuneMario.h">
+      <Filter>Resource Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="playTuneLaSalle.h">
       <Filter>Resource Files\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
