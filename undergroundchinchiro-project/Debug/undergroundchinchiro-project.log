@@ -1,4 +1,6 @@
 ﻿  main.cpp
-c:\users\11400314\documents\github\undergroundchinchiro-project\undergroundchinchiro-project\main.cpp(117): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-c:\users\11400314\documents\github\undergroundchinchiro-project\undergroundchinchiro-project\main.cpp(630): warning C4715: 'GivePayout': not all control paths return a value
+c:\users\11400314\documents\github\undergroundchinchiro-project\undergroundchinchiro-project\main.cpp(108): warning C4305: 'argument': truncation from 'int' to 'bool'
+c:\users\11400314\documents\github\undergroundchinchiro-project\undergroundchinchiro-project\main.cpp(673): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\11400314\documents\github\undergroundchinchiro-project\undergroundchinchiro-project\main.cpp(431): warning C4715: 'GivePayout': not all control paths return a value
+c:\users\11400314\documents\github\undergroundchinchiro-project\undergroundchinchiro-project\main.cpp(592): warning C4715: 'ForceDiceOutput': not all control paths return a value
   undergroundchinchiro-project.vcxproj -> C:\Users\11400314\Documents\GitHub\undergroundchinchiro-project\Debug\undergroundchinchiro-project.exe

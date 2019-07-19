@@ -13,82 +13,6 @@ using namespace std;
 
 //FINAL PROJECT - undergroundchinchiro-project
 
-//The Users. Dealer and the Player
-struct User {
-	//Name of the User
-	string name;
-	//amount of money this user has
-	int money = 0;
-	//amount wagered/bet
-	int wager = 0;
-} dealerUser, playerUser;
-
-
-//The Roll struct
-struct Roll {
-	//Snake Eyes, Triples, Royal, Pairs, Bust, Peasant, Pisser
-	string type;
-	//Snake Eyes(6), Triples(5), Royal(4), Pairs(3), Bust(2), Peasant(1), Pisser(0)
-	int rank = -1;
-	//The value of the roll for Triples but for Pairs is the other unpaired number
-	int value = -1;
-	//The number of the paired number in Pairs
-	int paired = -1;
-	//The dice array 
-	int dice[3] = { 0, 0, 0 };
-};
-
-//Asks User how much to bet. Then store that bet as their wager.
-User DoWager(User user);
-
-//Returns 0 if User input an invalid bet (Less than minimum, more than max, or a char) else returns bet value. 
-int ValidateWager(int money, User user);
-
-//Roll n amount of dice depending on the dice array size
-//Returns a struct which represents the new roll values.
-Roll RollDice();
-
-//Prints the roll
-void PrintRoll(Roll roll);
-
-//Prints the roll
-//In an Ascending order but Value is first displayed for Pairs
-void PrintSortedRoll(Roll roll);
-
-//Evaluates and Prints the Type of the Roll
-void EvaluateRoll(Roll roll);
-
-//Roll dice consecutively until ...
-Roll RollConsecDice(User user, int amount);
-
-//Compare Rolls and return an int.
-//No compare needed if dealer got a pisser.
-int CompareRoll(Roll dealerRoll, Roll playerRoll);
-
-//Display Compare, and the result
-void DisplayResult(int result, Roll dealerRoll, Roll playerRoll);
-
-//Givethe payout based on result and Roll of player
-int GivePayout(int result, int wager, Roll playerRoll);
-
-//0 - Worst. 1 - Bad, 2 - Meh, 3 - Good, 4 - Best;
-int EvaluateEnding(int curMoney);
-
-//Display Ending based on evaluation
-void DisplayEnding(int result);
-
-//Check if user as enough money for next round, if no money asks for retry.
-void CheckUserMoney(User user);
-
-//Debug - Force dice of chosen rank and value
-Roll ForceDiceOutput(int rank, int value);
-
-//Debug - For visual purposes
-Roll PlaceDice(Roll newRoll, int dice1, int dice2, int dice3);
-
-//Start up Sequence
-void StartUpSequence(bool enable);
-
 //Constants
 int STARTING_MONEY = 90000; //Amount of money player starts
 float PISSER_CHANCE = 5; //A simulated chance of dice going out of bounds
@@ -108,140 +32,54 @@ int PAIRS_MULT = 1; //WAGER * MULT recieved when PAIRS
 int PEASANT_MULT = 2; //WAGER * MULT taken when PEASANT
 
 int ch = ' ';
-bool includeIntro = false; //Enable to include intro scene
+bool includeIntro = true; //Enable to include intro scene
 bool includeStartUp = true; //Enable opening tune
+bool enableDebug = false;
 int curRound = 0; //current round
-Roll dealerRoll;
-Roll playerRoll;
-int main() {
-	srand(time(NULL)); //Randomize Seed
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15); //Set default color of text
 
-	//Initialization
-	dealerUser.name = "OTSUKI";
-	playerUser.name = "KAIJI";
-	playerUser.money = STARTING_MONEY;
+//The Roll struct
+struct Roll {
+	string type = "None"; //Snake Eyes, Triples, Royal, Pairs, Bust, Peasant, Pisser
+	int rank = -1; //Snake Eyes(6), Triples(5), Royal(4), Pairs(3), Bust(2), Peasant(1), Pisser(0)
+	int value = -1; //Number of the roll for Triples but for Pairs is the unpaired number
+	int paired = -1; //Number of the paired number in Pairs
+	int dice[3] = { 0, 0, 0 }; //The dice array 
+};
 
-	//WINDOWS XP START UP Sound OPENING if true
-	StartUpSequence(includeStartUp);
+//The Users struct, includes the roll
+struct User {	
+	string name; //Name of the User
+	int money = 0; //Amount of money this user has
+	int wager = 0; //Amount wagered/bet
+	Roll roll; //Roll of the user
+};
 
-	//Introduction runs if includeIntro is true
-	if (includeIntro) {
-		bool wantPlay = true;
-		while ((ch != 'y') && (ch != 'n')) {
-			cout << playerUser.name << "-san, do you want to play the Underground Chinchiro? (y/n)" << endl;
-			ch = _getch();
-		}
-
-		if (ch == 'y') {
-			//Offer a tutorial
-			ch = ' '; //Reset
-			system("cls");
-			while ((ch != 'y') && (ch != 'n')) {
-				cout << "Hmmm, Want me to remind you how it works? (y/n)" << endl;
-				ch = _getch();
-			}
-		}
-		else if (ch == 'n') {
-			//Instant Game Over
-			curRound = 99;
-			wantPlay = false;
-			system("cls");
-			cout << "GAME OVER" << endl;
-			cout << playerUser.name << " kept his " << playerUser.money << " Perico and lived happily every after." << endl;
-			system("pause");
-			return 0;
-		}
-
-		//Tutorial --- in progress
-		if (wantPlay) {
-			if (ch == 'y') {
-				system("cls");
-				cout << "Well, listen closely " << playerUser.name << "." <<endl;
-				system("pause");
-			}
-			else if (ch == 'n') {
-				cout << "Well, let's start then. This time however I'll be the only dealer. Try to get as much money as possible in 10 rounds." << endl;
-				system("pause");
-			}
-		}
+//Checks player's bet against a number of factors (Less than MIN_WAGER, more than their Current Money, or a char)
+int ValidateWager(int bet, User dealer, User player) {
+	//Incase player inputs a char
+	cin.clear();
+	cin.ignore(INT_MAX, '\n');
+	if (bet < 1) { 
+		cout << endl;
+		cout << dealer.name << ": Focus on the game, " << player.name << "-san" << endl;
+		return 0;
 	}
-
-	//Game Loop
-	while (MAX_ROUND > curRound) {
-		//Increase or Next Round
-		curRound++;
-
-		//RESET
-		Roll dealerRoll;
-		Roll playerRoll;
-
-		//For new round set wager display to 0
-		PrintInfoText(curRound, playerUser.money, 0, true);
+	else if (bet > player.money) {
 		cout << endl;
-
-		//Phase 1 - Player Bets/Wager
-		playerUser = DoWager(playerUser);
-
-		//Clear to print new info text with the wager
-		PrintInfoText(curRound, playerUser.money, playerUser.wager, true);
-		cout << endl;
-
-		//Phase 2 - Dealer Rolls
-		dealerRoll = RollConsecDice(dealerUser, MAX_BUST);
-		//dealerRoll = ForceDiceOutput(6, 2);
-		EvaluateRoll(dealerRoll);
-		system("pause");
-		cout << endl;
-
-		//Clear again
-		PrintInfoText(curRound, playerUser.money, playerUser.wager, true);
-		cout << endl;
-
-		//If dealer didnt roll a Pisser else skip player roll phase
-		if (dealerRoll.rank != 0) {
-			//Phase 3 - Player Rolls
-			playerRoll = RollConsecDice(playerUser, MAX_BUST);
-			//playerRoll = ForceDiceOutput(6, 1);
-			EvaluateRoll(playerRoll);
-			system("pause");
-			cout << endl;
-		} 
-
-		//Clear again
-		PrintInfoText(curRound, playerUser.money, playerUser.wager, true);
-		cout << endl;
-
-		//Phase 4 - Results/Compare
-		cout << "-------RESULT---------" << endl;
-		int result; //0 Draw, 1 - Dealer win. 2 - Player win	
-		result = CompareRoll(dealerRoll, playerRoll);
-		DisplayResult(result, dealerRoll, playerRoll);
-	
-		//Phase 5 - Payout
-		cout << endl;
-		cout << "-------PAYOUT---------" << endl;
-		playerUser.money += GivePayout(result, playerUser.wager, playerRoll);
-		cout << endl;
-
-		system("pause");
-		system("cls");
-		//Check money of users
-		CheckUserMoney(playerUser);
+		cout << dealer.name << ": You only have " << player.money << " Perico, " << player.name << "-san" << endl;
+		return 0;
 	}
-
-	//Phase 6 - Ending
-	cout << "-------ENDING---------" << endl;
-	cout << endl;	
-	int endingResult = EvaluateEnding(playerUser.money);
-	DisplayEnding(endingResult);
-
-	system("pause");
-	cout << endl;
-	return 0;
+	else if (bet < MIN_WAGER) {
+		cout << endl;
+		cout << dealer.name << ": The minimum wager is " << MIN_WAGER << " Perico, " << player.name << "-san" << endl;
+		return 0;
+	}
+	//If none of the above
+	return bet;
 }
 
-User DoWager(User user) {
+//Asks player how much to bet then store that bet as their wager if valid.
+User DoWager(User dealer, User player) {
 	int bet = 0;
 	while (bet == 0) {
 		cout << "How much do you want to bet?" << endl;
@@ -252,10 +90,10 @@ User DoWager(User user) {
 			bet = MIN_WAGER;
 			break;
 		case 2: //bet the same as last time
-			bet = user.wager;
+			bet = player.wager;
 			break;
 		case 3: //ALL IN
-			bet = user.money;
+			bet = player.money;
 			break;
 		case 4: //bet 20,000
 			bet = 20000;
@@ -266,40 +104,130 @@ User DoWager(User user) {
 		case 81:
 			PlayTuneMario(1);
 			break;
+		case 99: //Debug
+			PlayNote('E', 3, 200, 2);
+			enableDebug = enableDebug ? false : true; //switch
+			break;
 		}
-		bet = ValidateWager(bet, user); //check if wager is not invalid
+		bet = ValidateWager(bet, dealer, player); //check if wager is not invalid
 	}
-	//user.money -= bet; //Reduce money based on bet
-	user.wager = bet; //Set wager as bet
-	return user;
+	player.wager = bet; //Set wager as bet
+	return player; //Return updated User
 }
 
-int ValidateWager(int bet, User user) {
-	if (bet < 1) { //Incase player inputs a char
-		cout << endl;
-		cout << dealerUser.name << ": Focus on the game, " << playerUser.name << "-san" << endl;	
-		cin.clear();
-		cin.ignore(INT_MAX, '\n');
-		return 0;
+//Roll n amount of dice depending on the dice array size, returns new Roll struct based on results.
+Roll RollDice() {
+	Roll newRoll;
+	cout << "Rolling . . ." << endl;
+	//Pisser check
+	if (PISSER_CHANCE >= rand() % 101) {
+		newRoll.type = "Pisser";
+		newRoll.rank = 0;
+		return newRoll;
 	}
-	else if (bet > user.money) {
-		cout << endl;
-		cout << dealerUser.name << ": You only have " << user.money << " Perico, " << playerUser.name << "-san" << endl;
-		cin.clear();
-		cin.ignore(INT_MAX, '\n');
-		return 0;
+	//Get dice array size, byte of the array divided by byte of its element
+	int size = sizeof(newRoll.dice) / sizeof(newRoll.dice[0]);
+	int sum = 0;
+	//Roll amount of dice based on size
+	for (int i = 0; i < size; i++) {
+		newRoll.dice[i] = (rand() % 6) + 1;
+		sum += newRoll.dice[i]; //Get the sum for later if neeeded
 	}
-	else if (bet < MIN_WAGER) {
-		cout << endl;
-		cout << dealerUser.name << ": The minimum wager is " << MIN_WAGER << " Perico, " << playerUser.name << "-san" << endl;
-		cin.clear();
-		cin.ignore(INT_MAX, '\n');
-		return 0;
+
+	int sameNums = 0;
+	//Finding Paired numbers are more probable, so do this first
+	for (int i = 0; i < size; i++) {
+		//Use first dice as check
+		int check = newRoll.dice[i];
+		//Check it against the rest
+		for (int ii = i + 1; ii < size; ii++) {
+			if (check == newRoll.dice[ii]) {
+				sameNums++; //Add sameNums check has a same number
+			}
+		}
+		//TRIPLE if first number is same as the rest but not a 1
+		if ((sameNums == 2) && (check != 1)) {
+			newRoll.type = "Triples";
+			newRoll.rank = 5;
+			newRoll.value = newRoll.dice[i];
+			return newRoll;
+		}
+		//PAIR if at least one is same
+		if (sameNums == 1) {
+			newRoll.type = "Pairs";
+			newRoll.rank = 3;
+			newRoll.paired = newRoll.dice[i];
+			//Find the number not equal to paired value.
+			for (int ii = 0; ii < size; ii++) {
+				if (newRoll.paired != newRoll.dice[ii]) {
+					//Set that as the value
+					newRoll.value = newRoll.dice[ii];
+					return newRoll;
+				}
+			}
+		}
 	}
-	//If none of the above
-	return bet;
+	//For the remaining
+	switch (sum) {
+	case 3: //1+1+1
+		newRoll.type = "Snake-Eyes";
+		newRoll.rank = 6;
+		break;
+	case 6: //1+2+3
+		newRoll.type = "Peasant";
+		newRoll.rank = 1;
+		break;
+	case 15: //4+5+6
+		newRoll.type = "Royal";
+		newRoll.rank = 4;
+		break;
+	default: //Everything else
+		newRoll.type = "Bust";
+		newRoll.rank = 2;
+		break;
+	}
+	return newRoll;
 }
 
+//Prints the roll as is or in an Ascending order but Value is first displayed for Pairs
+void PrintRoll(Roll roll, bool sort = false) {
+	int size = sizeof(roll.dice) / sizeof(roll.dice[0]);
+	if (sort) {
+		Roll sortedRoll = roll;
+		//Sort Dice in Ascending order if not PAIRED
+		if (sortedRoll.type != "Pairs") {
+			for (int i = 0; i < size; i++) {
+				int check = sortedRoll.dice[i];
+				int swapIndex = i;
+				for (int ii = i; ii < size; ii++) {
+					//Find number greater than check then store that
+					if (sortedRoll.dice[ii] < check) {
+						check = sortedRoll.dice[ii];
+						swapIndex = ii;
+					}
+				}
+				//If check is not equal to dice[i] start swapping
+				if (sortedRoll.dice[i] != check) {
+					sortedRoll.dice[swapIndex] = sortedRoll.dice[i];
+					sortedRoll.dice[i] = check;
+				}
+			}
+		}
+		else {
+			//Let value be the first number then the pairs
+			sortedRoll.dice[0] = roll.value;
+			sortedRoll.dice[1] = roll.paired;
+			sortedRoll.dice[2] = roll.paired;
+		}
+	}
+	for (int i = 0; i < size; i++) {
+		Sleep(DEFAULT_TIME);
+		PlayNote('C', roll.dice[i] + 1, 200); //Each digit, different octave
+		cout << roll.dice[i] << " ";
+	}
+}
+
+//Roll dice consecutively until reached the max
 Roll RollConsecDice(User user, int max) {
 	int retries = 0;
 	Roll newRoll;
@@ -327,178 +255,47 @@ Roll RollConsecDice(User user, int max) {
 	return newRoll;
 }
 
-Roll RollDice() {
-	Roll newRoll;
-	cout << "Rolling . . ." << endl;
-	//Pisser check
-	if (PISSER_CHANCE >= rand() % 101) {
-		newRoll.type = "Pisser";
-		newRoll.rank = 0;
-		return newRoll;
-	}
-	//Get dice array size
-	int size = sizeof(newRoll.dice) / sizeof(newRoll.dice[0]);
-	int sum = 0;
-	//Roll amount of dice based on size
-	for (int i = 0; i < size; i++) {
-		newRoll.dice[i] = (rand() % 6) + 1;
-		sum += newRoll.dice[i]; //Get the sum for later if neeeded
-	}
-
-
-	int sameNums = 0;
-	//Finding Paired numbers are more probable, so do this first
-	for (int i = 0; i < size; i++) {
-		//Use first dice as check
-		int check = newRoll.dice[i];
-		//Check it against the rest
-		for (int ii = i + 1; ii < size; ii++) {
-			if (check == newRoll.dice[ii]) {
-				sameNums++; //Add sameNums check has a same number
-			}
-		}
-		//TRIPLE if first number is same as the rest but not a 1
-		if ((sameNums == 2) && (check != 1)) {
-			newRoll.type = "Triples";
-			newRoll.rank = 5;
-			newRoll.value = newRoll.dice[i]; 
-			return newRoll;
-		}
-		//PAIR if at least one is same
-		if (sameNums == 1) {
-			newRoll.type = "Pairs";
-			newRoll.rank = 3;
-			newRoll.paired = newRoll.dice[i];
-			//Find the number not equal to paired value.
-			for (int ii = 0; ii < size; ii++) {
-				if (newRoll.paired != newRoll.dice[ii]) {
-					//Set that as the value
-					newRoll.value = newRoll.dice[ii];
-					return newRoll;
-				}
-			}
-		}
-	}
-	//All equally have low chance to get
-	//1-2-3 Peasant
-	if (sum == 6) {
-		newRoll.type = "Peasant";
-		newRoll.rank = 1;
-		return newRoll;
-	}
-	//4-5-6 Royal
-	if (sum == 15) {
-		newRoll.type = "Royal";
-		newRoll.rank = 4;
-		return newRoll;
-	}
-	//1-1-1 Snake eyes 
-	if (sum == 3) {
-		newRoll.type = "Snake-Eyes";
-		newRoll.rank = 6;
-		return newRoll;
-	}
-	//Last if nothing else, bust
-	newRoll.type = "Bust";
-	newRoll.rank = 2;
-	return newRoll;
-}
-
-void PrintRoll(Roll roll) {
-	//Don't do anything for Pisser
-	if (roll.rank != 0) {
-		for (int i = 0; i < 3; i++) {
-			Sleep(DEFAULT_TIME);
-			PlayNote('C', roll.dice[i] + 1, 200);
-			cout << roll.dice[i] << " ";
-		}
-	}
-}
-
-void PrintSortedRoll(Roll roll) {
-	Roll sortedRoll = roll;
-	int size = sizeof(sortedRoll.dice) / sizeof(sortedRoll.dice[0]);
-	//Sort Dice in ascending order if not PAIRED
-	if (sortedRoll.type != "Pairs") {
-		for (int i = 0; i < size; i++) {
-			int check = sortedRoll.dice[i];
-			int swapIndex = i;
-			for (int ii = i; ii < size; ii++) {
-				//Find number greater than check then store that
-				if (sortedRoll.dice[ii] < check) {
-					check = sortedRoll.dice[ii];
-					swapIndex = ii;
-				}
-			}
-			//If check is not equal to dice[i] start swapping
-			if (sortedRoll.dice[i] != check) {
-				sortedRoll.dice[swapIndex] = sortedRoll.dice[i];
-				sortedRoll.dice[i] = check;
-			}
-		}
-	}
-	else {
-		//Sort value as first number then the pairs
-		sortedRoll.dice[0] = roll.value;
-		sortedRoll.dice[1] = roll.paired;
-		sortedRoll.dice[2] = roll.paired;
-	}
-	for (int i = 0; i < 3; i++) {
-		//Sleep(DEFAULT_TIME * (1 + ((LAST_DICE_MULT - 1) * ((LAST_TIME_CHANCE > rand() % 101) && (i == 2)))));	
-		PlayNote('C', roll.dice[i] + 1, 200);
-		cout << sortedRoll.dice[i] << " ";
-	}
-};
-
-void EvaluateRoll(Roll roll) {
-	//Sleep(DEFAULT_TIME);
+//Prints the Type of the Roll and some tunes
+void ShowRoll(Roll roll) {
+	Sleep(DEFAULT_TIME);
 	cout << endl;
+	cout << "Roll is a " << roll.type << " -> ";
+	PrintRoll(roll, true);
 	switch (roll.rank) {
-	case 0:
-		Sleep(DEFAULT_TIME); //Wait for a bit.
-		cout << "Roll is a Pisser" << endl;
+	case 0: //Pisser
+		Sleep(DEFAULT_TIME);
 		PlayNote('C', 3, 200);
 		PlayNote('C', 2, 200);
 		break;
-	case 1:
-		cout << "Roll is a Peasant -> ";
-		PrintSortedRoll(roll);
+	case 1: //Peasant
 		cout << endl;
 		PlayNote('C', 3, 200);
 		PlayNote('C', 2, 200);
 		break;
-	case 2:
-		cout << "Roll is a Bust -> ";
-		PrintSortedRoll(roll);
+	case 2: //Bust
 		cout << endl;
 		PlayNote('C', 3, 200);
 		PlayNote('C', 2, 200);
 		break;
-	case 3:
-		cout << "Roll is Pairs -> ";
-		PrintSortedRoll(roll);
+	case 3: //Pairs
 		cout << endl;
 		PlayNote('C', 3, 200);
 		PlayNote('C', 4, 500);
 		PlayNote('C', 5, 700);
 		break;
-	case 4:
-		cout << "Roll is Royal -> ";
-		PrintSortedRoll(roll);
+	case 4: //Royal
 		PlayNote('C', 4, 400);
 		PlayNote('C', 5, 200);
 		PlayNote('C', 5, 200);
 		PlayNote('C', 6, 700);
 		cout << endl;
 		break;
-	case 5:
-		cout << "Roll is Triples!" << endl;
+	case 5: //Triples
 		PlayNote('C', 4, 400);
 		PlayNote('D', 5, 400);
 		PlayNote('E', 5, 400);
 		break;
-	case 6:
-		cout << "Roll is Snake Eyes!!" << endl;
+	case 6: //Snake Eyes
 		PlayNote('C', 4, 400);
 		PlayNote('B', 3, 400);
 		PlayNote('A', 3, 400);
@@ -509,8 +306,10 @@ void EvaluateRoll(Roll roll) {
 		system("pause");
 		break;
 	}
+	cout << endl;
 }
 
+//Compare Rolls and return an int. No compare needed if dealer got a pisser.
 int CompareRoll(Roll dealerRoll, Roll playerRoll) {
 	//Instant win for player, pisser
 	if (dealerRoll.rank == 0) {
@@ -520,10 +319,10 @@ int CompareRoll(Roll dealerRoll, Roll playerRoll) {
 	if (dealerRoll.rank == playerRoll.rank) {
 		//If pairs or triples
 		if (dealerRoll.value > playerRoll.value) {
-			return 1; 
+			return 1;
 		}
 		//If snake eyes
-		if (dealerRoll.rank == 6){
+		if (dealerRoll.rank == 6) {
 			return 0; //Same snake eyes is Draw
 		}
 		//Player wins on Bust Peasant and Pairs with same or greater value
@@ -541,30 +340,31 @@ int CompareRoll(Roll dealerRoll, Roll playerRoll) {
 	return 2;
 }
 
-void DisplayResult(int result, Roll dealerRoll, Roll playerRoll) {
+//Display comparison, and the result
+void DisplayResult(int result, User dealerUser, User playerUser) {
 	//If dealer is pisser, no need to compare
-	if (dealerRoll.rank != 0) {
+	if (dealerUser.roll.rank != 0) {
 		//Dice values compare
-		PrintSortedRoll(dealerRoll);
+		PrintRoll(dealerUser.roll, true);
 		cout << "VS ";
-		PrintSortedRoll(playerRoll);
+		PrintRoll(playerUser.roll, true);
 		cout << endl;
 		//Type compare
-		cout << dealerRoll.type << " VS " << playerRoll.type << endl;
+		cout << dealerUser.roll.type << " VS " << playerUser.roll.type << endl;
 		cout << endl;
 		//Pairs and Triples, Value compare
-		if ((dealerRoll.rank == playerRoll.rank) && ((playerRoll.rank == 3) || (playerRoll.rank == 5))) {
-			if (dealerRoll.value > playerRoll.value) {
-				cout << dealerRoll.value << " > " << playerRoll.value << endl;
+		if ((dealerUser.roll.rank == playerUser.roll.rank) && ((playerUser.roll.rank == 3) || (playerUser.roll.rank == 5))) {
+			if (dealerUser.roll.value > playerUser.roll.value) {
+				cout << dealerUser.roll.value << " > " << playerUser.roll.value << endl;
 				cout << endl;
 			}
 			else {
-				cout << dealerRoll.value << " < " << playerRoll.value << endl;
+				cout << dealerUser.roll.value << " < " << playerUser.roll.value << endl;
 				cout << endl;
 			}
 		}
 	}
-	
+
 	switch (result) {
 	case 0:
 		cout << "DRAW" << endl;
@@ -587,25 +387,26 @@ void DisplayResult(int result, Roll dealerRoll, Roll playerRoll) {
 	}
 }
 
-int GivePayout(int result, int wager, Roll playerRoll) {
-	int winnings = wager;
+//Return the payout based on result
+int GivePayout(int result, User player, User dealer) {
+	int winnings = player.wager;
 	switch (result) {
 	case 0: //Draw
 		cout << "It's a draw";
 		return 0;
 		break;
 	case 1: //Lose
-		//Reduce money based on wager but if player is peasant
-		if (playerRoll.rank == 1) {
-			//has to pay twice his bet to the void
+			//Reduce money based on wager but if player is peasant
+		if (player.roll.rank == 1) {
+			//has to pay twice
 			winnings *= PEASANT_MULT;
 		}
-		cout << playerUser.name << " has to pay " << winnings << " Perico to " << dealerUser.name;
-		winnings *= -1;
+		cout << player.name << " has to pay " << winnings << " Perico to " << dealer.name;
+		winnings *= -1; //Negative for substraction
 		return winnings;
 		break;
 	case 2: //Win
-		switch (playerRoll.rank) {
+		switch (player.roll.rank) {
 		case 6: //Snake Eyes
 			winnings *= SNAKE_EYES_MULT;
 			break;
@@ -620,15 +421,16 @@ int GivePayout(int result, int wager, Roll playerRoll) {
 			break;
 		default:
 			//ANYTHING ELSE
-			playerUser.money += winnings;
+			player.money += winnings;
 			break;
-		}		
-		cout << playerUser.name << " won " << winnings << " Perico.";
+		}
+		cout << player.name << " won " << winnings << " Perico.";
 		return winnings;
 		break;
 	}
 }
 
+//Return an int based on the ammount of money
 int EvaluateEnding(int curMoney) {
 	//When game ends sooner because of money
 	if (curMoney < 0) {
@@ -638,6 +440,9 @@ int EvaluateEnding(int curMoney) {
 	if (curMoney < MIN_WAGER) {
 		//Bad Ending
 		return 1;
+	}
+	if (curMoney == STARTING_MONEY) {
+		return 5;
 	}
 	//Finished game
 	if (curMoney < 90000) {
@@ -652,51 +457,54 @@ int EvaluateEnding(int curMoney) {
 		//Good Ending
 		return 3;
 	}
-	cout << "This shouldn't happen";
 }
 
-void DisplayEnding(int result) {
-	switch (result) {
+//Display Ending based on the evaluation
+void DisplayEnding(int evaluation, User player, User dealer) {
+	switch (evaluation) {
 	case 0: //Worse
-		cout << playerUser.name << "-san went home with a debt of " << playerUser.money * -1 << " Perico to " << dealerUser.name << endl;
+		cout << player.name << "-san went home with a debt of " << player.money * -1 << " Perico to " << dealer.name << endl;
 		cout << endl;
 		cout << "WORST ENDING!!" << endl;
 		break;
 	case 1: //Bad Ending
-		cout << playerUser.name << "-san left with only " << playerUser.money << " Perico left." << endl;
-		cout << "It wasn't even enough for the minimum bet." << endl;
+		cout << player.name << "-san left with only " << player.money << " Perico left.\nIt wasn't even enough for the minimum bet." << endl;
 		cout << endl;
 		cout << "BAD ENDING!" << endl;
 		PlayTuneMario(0);
 		break;
 	case 2: //Meh
-		cout << playerUser.name << "-san left the with " << playerUser.money << " Perico. " << endl;
-		cout << "He returned with less than he started with." << endl;
-
-		cout << "It certainely wasn't worth it." << endl;
+		cout << player.name << "-san left the with " << player.money << " Perico.\nHe returned with less than he started with.\nIt certainely wasn't worth it." << endl;
 		cout << endl;
 		cout << "Meh Ending" << endl;
 		break;
 	case 3: //Good
-		cout << playerUser.name << "-san came back more than he started by having " << playerUser.money << " Perico." << endl;
-		cout << "He felt going back for another round!" << endl;
+		cout << player.name << "-san came back more than he started by having " << player.money << " Perico.\nHe felt going back for another round!" << endl;
 		cout << endl;
 		cout << "GOOD ENDING!" << endl;
 		break;
 	case 4: //Best
-		cout << playerUser.name << "-san got " << playerUser.money << " Perico. He got half a million!" << endl;
+		cout << player.name << "-san got " << player.money << " Perico. He got half a million!" << endl;
 		cout << "He thought about spending it on blackjacks and hookers." << endl;
 		cout << endl;
 		cout << "BEST ENDING!!" << endl;
 		break;
+	case 5: //Same Money or Left
+		cout << player.name << "-san managed to keep " << player.money << " Perico." << endl;
+		cout << "He left happy and satisfied that he didn't lose anything." << endl;
+		cout << endl;
+		cout << "NORMAL ENDING!!" << endl;
+		break;
 	}
+	cout << endl;
 	cout << "GAME OVER" << endl;
 }
 
-void CheckUserMoney(User user) {
-	if (user.money < MIN_WAGER) {
+//Check if player has enough money for next round, if no money asks for if they want to retry the game.
+void CheckUserMoney(User player, User dealer) {
+	if (player.money < MIN_WAGER) {
 		cout << endl;
-		cout << dealerUser.name << ": Ah, " << playerUser.name << "-san, You don't have enough Perico..." << endl;
+		cout << dealer.name << ": Ah, " << player.name << "-san, You don't have enough Perico..." << endl;
 		cout << endl;
 		cout << "Retry? (y/n)" << endl;
 		int choice = ' ';
@@ -704,10 +512,10 @@ void CheckUserMoney(User user) {
 			choice = _getch();
 		}
 		if (choice == 'y') {
-			playerUser.money = STARTING_MONEY; //Give money back
+			player.money = STARTING_MONEY; //Give money back
 			curRound = 0; //Restart the round
 		}
-		else {		
+		else {
 			curRound = MAX_ROUND; //End game early
 		}
 		cout << endl;
@@ -715,52 +523,7 @@ void CheckUserMoney(User user) {
 
 }
 
-Roll ForceDiceOutput(int rank, int value = 1) {
-	Roll newRoll;
-	cout << "Placing Dice Manually. . ." << endl;
-	Sleep(DEFAULT_TIME);
-	int size = sizeof(newRoll.dice) / sizeof(newRoll.dice[0]);
-	switch (rank) {
-	case 6:
-		newRoll.type = "Snake Eyes";
-		newRoll = PlaceDice(newRoll, 1, 1, 1);
-		break;
-	case 5:
-		newRoll.type = "Triples";
-		newRoll.value = value;
-		newRoll = PlaceDice(newRoll, value, value, value);
-		break;
-	case 4:
-		newRoll.type = "Royal";
-		newRoll = PlaceDice(newRoll, 4, 5, 6);
-		break;
-	case 3:
-		newRoll.type = "Pairs";
-		newRoll.value = value;
-		newRoll.paired = 3;
-		newRoll = PlaceDice(newRoll, value, 3, 3);
-		break;
-	case 2:
-		newRoll.type = "Bust";
-		newRoll = PlaceDice(newRoll, 1, 4, 3);
-		break;
-	case 1:
-		newRoll.type = "Peasant";
-		newRoll = PlaceDice(newRoll, 1, 2, 3);
-		break;
-	case 0:
-		newRoll.type = "Pisser";
-		newRoll = PlaceDice(newRoll, 0, 0, 0);
-		break;
-	default:
-		cout << "Invalid Rank" << endl;
-		system("pause");
-		break;
-	}
-	newRoll.rank = rank;
-	return newRoll;
-}
-
+//Debug - For visual purposes
 Roll PlaceDice(Roll newRoll, int dice1, int dice2, int dice3) {
 	newRoll.dice[0] = dice1;
 	PlayNote('D', dice1, 200);
@@ -771,6 +534,67 @@ Roll PlaceDice(Roll newRoll, int dice1, int dice2, int dice3) {
 	return newRoll;
 }
 
+//Debug - Force dice of chosen rank and value
+Roll ForceDiceOutput(Roll roll, bool enable) {
+	if (enable) {
+		int rank = 1;
+		int value = 1;
+		cout << "Input rank: ";
+		cin >> rank;
+		if ((rank == 5) && (rank == 3)) {
+			cout << "Input value: ";
+			cin >> value;
+		}
+		Roll newRoll;
+		cout << "Placing Dice Manually. . ." << endl;
+		Sleep(DEFAULT_TIME);
+		int size = sizeof(newRoll.dice) / sizeof(newRoll.dice[0]);
+		switch (rank) {
+		case 6:
+			newRoll.type = "Snake Eyes";
+			newRoll = PlaceDice(newRoll, 1, 1, 1);
+			break;
+		case 5:
+			newRoll.type = "Triples";
+			newRoll.value = value;
+			newRoll = PlaceDice(newRoll, value, value, value);
+			break;
+		case 4:
+			newRoll.type = "Royal";
+			newRoll = PlaceDice(newRoll, 4, 5, 6);
+			break;
+		case 3:
+			newRoll.type = "Pairs";
+			newRoll.value = value;
+			newRoll.paired = 3;
+			newRoll = PlaceDice(newRoll, value, 3, 3);
+			break;
+		case 2:
+			newRoll.type = "Bust";
+			newRoll = PlaceDice(newRoll, 1, 4, 3);
+			break;
+		case 1:
+			newRoll.type = "Peasant";
+			newRoll = PlaceDice(newRoll, 1, 2, 3);
+			break;
+		case 0:
+			newRoll.type = "Pisser";
+			newRoll = PlaceDice(newRoll, 0, 0, 0);
+			break;
+		default:
+			cout << "Invalid Rank" << endl;
+			system("pause");
+			break;
+		}
+		newRoll.rank = rank;
+		return newRoll;
+	}
+	else {
+		return roll;
+	}
+}
+
+//Start up Sequence
 void StartUpSequence(bool enable) {
 	if (enable) {
 		cout << "Jerry Presents" << endl;
@@ -779,10 +603,158 @@ void StartUpSequence(bool enable) {
 		PlayNote('A', 5, 300);
 		cout << endl;
 		PlayNote('G', 5, 500);
-		PlayNote('D', 6, 200);
+		PlayNote('D', 6, 200);	
 		cout << "UNDERGROUND CHINCHINRO!" << endl;
 		PlayNote('A', 5, 600);
-		cout << endl;
 		system("pause");
 	}
+}
+
+//Start the Introduction or Tutorial
+void StartIntroduction(bool enable, User player) {
+	system("cls");
+	bool wantPlay = true;
+	while ((ch != 'y') && (ch != 'n')) {
+		cout << player.name << "-san, do you want to play the Underground Chinchiro? (y/n)" << endl;
+		ch = _getch();
+	}
+
+	if (ch == 'y') {
+		//Offer a tutorial
+		ch = ' '; //Reset
+		system("cls");
+		while ((ch != 'y') && (ch != 'n')) {
+			cout << "Hmmm, Want me to remind you how it works? (y/n)" << endl;
+			ch = _getch();
+		}
+	}
+	else if (ch == 'n') {
+		//Instant Game Over
+		curRound = MAX_ROUND;
+		wantPlay = false;
+		system("cls");
+		//cout << "GAME OVER" << endl;
+		//cout << player.name << " kept his " << player.money << " Perico and lived happily every after." << endl;
+		//system("pause");
+	}
+
+	//Tutorial --- in progress
+	if (wantPlay) {
+		if (ch == 'y') {
+			system("cls");
+			cout << "Well, listen closely " << player.name << "." << endl;
+			system("pause");
+			cout << "I will be only dealer this time and try to get as much money as possible in 10 rounds. " << player.name << "." << endl;
+			system("pause");
+			cout << "It's simple. We throw 3 dice and compare our rolls to each other." << endl;
+			system("pause");
+			cout << "Goal is to get Pairs or Triples, Triples is higher than Pairs by the way." << endl;
+			system("pause");
+			cout << "For pairs the other number is the value to compare for that roll." << endl;
+			system("pause");
+			cout << "And... well, I think it's much better to learn as we play." << endl;
+			system("pause");
+			cout << "I promize I won't cheat this time." << endl;
+			system("pause");
+			cout << "Ah, Be careful in throwing the dice alright?" << endl;
+			system("pause");
+			cout << "Let's go!" << endl;
+			system("pause");
+			cout << "Hints:\nBet: 1 - Minimum Wager, 2 - Last Wager, 3 - All-In, 4 - 20,000" << endl;
+			system("pause");
+		}
+		else if (ch == 'n') {
+			cout << "Well, let's start then. This time however I'll be the only dealer. Try to get as much money as possible in 10 rounds." << endl;
+			system("pause");
+			cout << "Hints:\nBet: 1 - Minimum Wager, 2 - Last Wager, 3 - All-In, 4 - 20,000" << endl;
+			system("pause");
+		}
+	}
+}
+
+int main() {
+	srand(time(NULL)); //Randomize Seed
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15); //Set default color of text
+
+	//Initialization
+	User dealerUser = {"OTSUKI"};
+	User playerUser = { "KAIJI" , STARTING_MONEY };
+
+	//WINDOWS XP START UP Sound OPENING if true
+	StartUpSequence(includeStartUp);
+	
+	//Introduction runs if includeIntro is true
+	StartIntroduction(includeIntro, playerUser);
+
+	//Game Loop
+	while (MAX_ROUND > curRound) {
+		//Increase or Next Round
+		curRound++;
+
+		//RESET Dice values
+		for (int i = 0; i < 3; i++) {
+			dealerUser.roll.dice[i] = 0;
+			playerUser.roll.dice[i] = 0;
+		}
+
+		//For new round set wager display to 0
+		PrintInfoText(curRound, playerUser.money, 0, true);
+		cout << endl;
+
+		//Phase 1 - Player Bets/Wager
+		playerUser = DoWager(dealerUser, playerUser);
+
+		//Clear to print new info text with the wager
+		PrintInfoText(curRound, playerUser.money, playerUser.wager, true);
+		cout << endl;
+
+		//Phase 2 - Dealer Rolls
+		dealerUser.roll = RollConsecDice(dealerUser, MAX_BUST);
+		dealerUser.roll = ForceDiceOutput(dealerUser.roll, enableDebug);
+		ShowRoll(dealerUser.roll);
+		system("pause");
+		cout << endl;
+
+		PrintInfoText(curRound, playerUser.money, playerUser.wager, true);
+		cout << endl;
+
+		//If Dealer didnt roll a Pisser else skip Player roll phase
+		if (dealerUser.roll.rank != 0) {
+			//Phase 3 - Player Rolls
+			playerUser.roll = RollConsecDice(playerUser, MAX_BUST);
+			playerUser.roll = ForceDiceOutput(playerUser.roll, enableDebug);
+			ShowRoll(playerUser.roll);
+			system("pause");
+			cout << endl;
+		}
+
+		PrintInfoText(curRound, playerUser.money, playerUser.wager, true);
+		cout << endl;
+
+		cout << "-------RESULT---------" << endl; //Phase 4 - Results/Compare
+		int result; //0 Draw, 1 - Dealer win. 2 - Player win	
+		result = CompareRoll(dealerUser.roll, playerUser.roll);
+		DisplayResult(result, dealerUser, playerUser);
+
+		//Phase 5 - Payout
+		cout << endl;
+		cout << "-------PAYOUT---------" << endl;
+		playerUser.money += GivePayout(result, playerUser, dealerUser);
+		cout << endl;
+
+		system("pause");
+		system("cls");
+		//Check money of users
+		CheckUserMoney(playerUser, dealerUser);
+	}
+
+	//Phase 6 - Ending
+	cout << "-------ENDING---------" << endl;
+	cout << endl;
+	int endingResult = EvaluateEnding(playerUser.money);
+	DisplayEnding(endingResult, playerUser, dealerUser);
+
+	system("pause");
+	cout << endl;
+	return 0;
 }
