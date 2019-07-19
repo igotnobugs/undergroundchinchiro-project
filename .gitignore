@@ -30,8 +30,3 @@
 *.exe
 *.out
 *.app
-
-# Debug Files
-[Dd]ebug/
-undergroundchinchiro-project/[Dd]ebug/
-.vs
