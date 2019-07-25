@@ -41,7 +41,7 @@ struct Roll {
 };
 
 //The Users struct, includes the Roll
-struct User {	
+struct User {
 	string name; //Name of the User
 	int money = 0; //Amount of money this user has
 	int wager = 0; //Amount wagered/bet
@@ -304,7 +304,7 @@ Roll RollConsecDice(User user, int max, bool enableDebug = false) {
 		}
 		//Return roll that is not a bust or the last one
 		return newRoll;
-	} 
+	}
 	else { //Debug
 		cout << "Input rank: ";
 		cin >> rank;
@@ -354,7 +354,7 @@ void ShowRoll(Roll roll) {
 	cout << endl;
 	cout << "Roll is a " << DICE_TYPE[roll.rank] << " -> ";
 	PrintRoll(roll, true);
-	PlayTuneDefault(roll.rank);	
+	PlayTuneDefault(roll.rank);
 	cout << endl;
 	return;
 }
@@ -368,7 +368,7 @@ int CompareRoll(Roll dealerRoll, Roll playerRoll) {
 	if (dealerRoll.rank == playerRoll.rank) {
 		//Same snake eyes is Draw
 		if (dealerRoll.rank == 6) {
-			return 0; 
+			return 0;
 		}
 		//If pairs or triples, highest value wins
 		if (dealerRoll.value > playerRoll.value) {
@@ -662,7 +662,7 @@ void StartIntroduction(bool enable, User player) {
 //Print the text to show a bunch of information
 void PrintInfoText(int curRound, int curMoney, int wager, bool clearScreen) {
 	if (clearScreen) system("cls");
-	
+
 	cout << "Round: " << curRound << " / 10" << endl;
 	cout << "You have: ";
 
@@ -703,16 +703,16 @@ int main() {
 	//system("pause");
 
 	//Initialization
-	User dealerUser = {"OTSUKI"};
+	User dealerUser = { "OTSUKI" };
 	User playerUser = { "KAIJI" , STARTING_MONEY };
 	bool includeStartUp = true; //Enable opening sequence
 	bool includeIntro = true; //Enable to include intro scene
 
 	StartUpSequence(includeStartUp);
-	StartIntroduction(includeIntro, playerUser); 
+	StartIntroduction(includeIntro, playerUser);
 
 	//Game Loop
-	while (MAX_ROUND > curRound) {	
+	while (MAX_ROUND > curRound) {
 		curRound++; //Increase or Next Round
 
 		//RESET Dice values
