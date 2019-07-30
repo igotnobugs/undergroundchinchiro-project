@@ -218,6 +218,158 @@ void PrintRoll(Roll roll, bool sort = false, bool quick = false) {
 	}
 	return;
 }
+
+Roll EvaluateDice(Roll roll) {
+	Roll newRoll = roll;
+	int size = sizeof(newRoll.dice) / sizeof(newRoll.dice[0]);
+	int sum = 0;
+	//Roll amount of dice based on size
+	for (int i = 0; i < size; i++) {
+		sum += newRoll.dice[i]; //Get the sum for later if neeeded
+	}
+	int sameNums = 0;
+	//Finding Paired numbers are more probable, so do this first
+	for (int i = 0; i < size; i++) {
+		//Use first dice as check
+		int check = newRoll.dice[i];
+		//Check it against the rest
+		for (int ii = i + 1; ii < size; ii++) {
+			if (check == newRoll.dice[ii]) {
+				sameNums++; //Add sameNums check has a same number
+			}
+		}
+		//TRIPLE if first number is same as the rest but not a 1
+		if ((sameNums == 2) && (check != 1)) {
+			newRoll.rank = 5;
+			newRoll.value = newRoll.dice[i];
+			newRoll.type = Triple;
+			return newRoll;
+		}
+		//PAIR if at least one is same
+		if (sameNums == 1) {
+			newRoll.rank = 3;
+			newRoll.paired = newRoll.dice[i];
+			//Find the number not equal to paired value.
+			for (int ii = 0; ii < size; ii++) {
+				if (newRoll.paired != newRoll.dice[ii]) {
+					//Set that as the value
+					newRoll.value = newRoll.dice[ii];
+					newRoll.type = Pairs;
+					return newRoll;
+				}
+			}
+		}
+	}
+	//For the remaining
+	switch (sum) {
+	case 3: //1+1+1
+		newRoll.rank = 6;
+		newRoll.type = SnakeEyes;
+		break;
+	case 6: //1+2+3
+		newRoll.rank = 1;
+		newRoll.type = Peasant;
+		break;
+	case 15: //4+5+6
+		newRoll.rank = 4;
+		newRoll.type = Royal;
+		break;
+	default: //Everything else
+		newRoll.rank = 2;
+		newRoll.type = Bust;
+		break;
+	}
+
+	return newRoll;
+}
+
+Roll RollDiceDebug() {
+	Roll newRoll;
+	int rank = 1;
+	int value = 1;
+	cout << "Input rank: ";
+	cin >> rank;
+	if ((rank == 5) || (rank == 3)) {
+		cout << "Input value: ";
+		cin >> value;
+	}
+	cout << "Placing Dice Manually. . ." << endl;
+	Sleep(DEFAULT_TIME);
+	switch (rank) {
+	case 6:
+		newRoll.type = SnakeEyes;
+		newRoll = PlaceDice(newRoll, 1, 1, 1);
+		break;
+	case 5:
+		newRoll.type = Triple;
+		newRoll.value = value;
+		newRoll = PlaceDice(newRoll, value, value, value);
+		break;
+	case 4:
+		newRoll.type = Royal;
+		newRoll = PlaceDice(newRoll, 4, 5, 6);
+		break;
+	case 3:
+		newRoll.type = Pairs;
+		newRoll.value = value;
+		newRoll.paired = 3;
+		newRoll = PlaceDice(newRoll, value, 3, 3);
+		break;
+	case 2:
+		newRoll.type = Bust;
+		newRoll = PlaceDice(newRoll, 1, 4, 3);
+		break;
+	case 1:
+		newRoll.type = Peasant;
+		newRoll = PlaceDice(newRoll, 1, 2, 3);
+		break;
+	case 0:
+		newRoll.type = Pisser;
+		newRoll = PlaceDice(newRoll, 0, 0, 0);
+		break;
+	default:
+		cout << "Invalid Rank" << endl;
+		system("pause");
+		break;
+	}
+	newRoll.rank = rank;
+	return newRoll;
+}
+
+Roll RollDicev2(int retries, bool enableDebug = false) {
+	Roll newRoll;
+
+	if (enableDebug) { //Debug Check
+		newRoll = RollDiceDebug();
+		//newRoll = EvaluateDice(newRoll);
+		return newRoll;
+	}
+
+	cout << "Rolling . . ." << endl;
+	if (PISSER_CHANCE >= rand() % 101) { //Pisser check
+		newRoll.rank = 0;
+		newRoll.type = Pisser;
+		return newRoll;
+	}
+	//Get dice array size, byte of the array divided by byte of its element
+	int size = sizeof(newRoll.dice) / sizeof(newRoll.dice[0]);
+	//Roll amount of dice based on size
+	for (int i = 0; i < size; i++) {
+		newRoll.dice[i] = (rand() % 6) + 1;
+		Sleep(DEFAULT_TIME);
+		cout << newRoll.dice[i] << " ";
+	}
+
+	newRoll = EvaluateDice(newRoll);
+
+	if ((newRoll.rank == 2) && (retries > 1)) { //if Bust and retries greater than 1
+		return RollDicev2(retries - 1);
+	}
+
+	return newRoll;
+}
+
+
 //Debug - For visual purposes
 Roll PlaceDice(Roll newRoll, int dice1, int dice2, int dice3) {
 	newRoll.dice[0] = dice1;
@@ -596,7 +748,8 @@ int main() {
 
 		//Phase 2 - Dealer Rolls
 
-		dealerUser.roll = RollConsecDice(dealerUser, MAX_BUST, enableDebug);
+		//dealerUser.roll = RollConsecDice(dealerUser, MAX_BUST, enableDebug);
+		dealerUser.roll = RollDicev2(MAX_BUST);
 		ShowRoll(dealerUser.roll);
 		system("pause");
 		cout << endl;
