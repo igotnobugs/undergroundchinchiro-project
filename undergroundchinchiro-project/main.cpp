@@ -522,7 +522,7 @@ int main() {
 		system("pause");
 		system("cls");
 		curRound *= CheckUserMoney(playerUser, dealerUser, false); //Check money of user
-		if (curRound == 0) { playerUser.money = STARTING_MONEY; } //If player restarted
+		if (curRound <= 0) { playerUser.money = STARTING_MONEY; } //If player restarted
 	}
 	//Phase 6 - Ending
 	cout << "-------ENDING---------" << endl;

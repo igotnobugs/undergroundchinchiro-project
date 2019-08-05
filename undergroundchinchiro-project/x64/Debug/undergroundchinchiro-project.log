@@ -1,3 +1,10 @@
-﻿  main.cpp
-c:\users\jerry\documents\unsorted\github\undergroundchinchiro-project\undergroundchinchiro-project\main.cpp(477): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-  undergroundchinchiro-project.vcxproj -> C:\Users\Jerry\Documents\Unsorted\Github\undergroundchinchiro-project\x64\Debug\undergroundchinchiro-project.exe
+﻿  playNote.cpp
+  main.cpp
+c:\users\11400314\documents\github\undergroundchinchiro-project\undergroundchinchiro-project\main.cpp(477): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  PlayTuneDefault.cpp
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  playTuneMegalovania.cpp
+  playTuneMario.cpp
+  playTuneLaSalle.cpp
+  undergroundchinchiro-project.vcxproj -> C:\Users\11400314\Documents\GitHub\undergroundchinchiro-project\x64\Debug\undergroundchinchiro-project.exe
